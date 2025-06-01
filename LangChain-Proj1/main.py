@@ -1,5 +1,7 @@
 # File: main.py
 import sys
+
+from chat_models.groq_llm_langchain import groq_response
 from chat_models.print_helper import print_hi
 from chat_models.chat_models_starter import response
 from chat_models.llm_function_chaining import result
@@ -7,8 +9,12 @@ from chat_models.vector_database_pipeline import process_document_file, print_ve
 
 def main():
     # 1) Greet / print any precomputed variables (same as before)
+    print("\n--- Chat Model Response ---\n")
     print_hi(response)
+    print("\n--- LLM Function Chaining Response ---\n")
     print_hi(result)
+    print("\n--- Groq LLM Response ---\n")
+    print_hi(groq_response.content)
 
     # 2) Check that the user passed in a filename to process
     if len(sys.argv) < 2:
