@@ -1,7 +1,7 @@
 # File: main.py
 import sys
 
-from chat_models.groq_llm_langchain import groq_response
+from chat_models.groq_llm_langchain import groq_response1
 from chat_models.print_helper import print_hi
 from chat_models.chat_models_starter import response
 from chat_models.llm_function_chaining import result
@@ -14,7 +14,7 @@ def main():
     print("\n--- LLM Function Chaining Response ---\n")
     print_hi(result)
     print("\n--- Groq LLM Response ---\n")
-    print_hi(groq_response.content)
+    print_hi(groq_response1.content)
 
     # 2) Check that the user passed in a filename to process
     if len(sys.argv) < 2:

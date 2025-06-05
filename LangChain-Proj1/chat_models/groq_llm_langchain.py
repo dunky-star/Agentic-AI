@@ -1,8 +1,12 @@
 # Import libraries
+"""
+Multi-Turn Conversations: The user asks two questions in sequence, and the LLM uses contextual memory to answer.
+"""
+
 import os
 
 from langchain_groq import ChatGroq
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from dotenv import load_dotenv
 import yaml
 
@@ -32,14 +36,34 @@ publication_content = """
     [rest of publication content... truncated for brevity]
 """
 
-# Same question, grounded in publication context
-messages = [
-    SystemMessage(content="You are a helpful AI assistant."),
-    HumanMessage(content=f"""
-        Based on this publication: {publication_content}
-        
-        What are variational autoencoders and list the top 5 applications for them as discussed in this publication.
+# Initialize conversation
+conversation = [
+    SystemMessage(content=f"""
+    You are a helpful AI assistant discussing a research publication.
+    Based your answer only on this on this publication content: {publication_content}
 """)
 ]
 
-groq_response = llm.invoke(messages)
+# User question 1
+conversation.append(
+    HumanMessage(content="""
+        What are variational autoencoders and list the top 5 applications for them as discussed in this publication.
+"""))
+
+groq_response1 = llm.invoke(conversation)
+
+print("🤖 AI Response to Question 1:")
+print(groq_response1.content)
+print("\n" + "="*50 + "\n")
+
+# Add AI's response to conversation history
+conversation.append(AIMessage(content=groq_response1.content))
+
+# User question 2 (follow-up)
+conversation.append(HumanMessage(content="""
+How does it work in case of anomaly detection?
+"""))
+
+response2 = llm.invoke(conversation)
+print("🤖 AI Response to Question 2:")
+print(response2.content)
