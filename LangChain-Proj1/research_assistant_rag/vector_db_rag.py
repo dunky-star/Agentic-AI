@@ -7,6 +7,7 @@ from langchain_groq import ChatGroq
 from paths import APP_CONFIG_FPATH, PROMPT_CONFIG_FPATH, OUTPUTS_DIR
 from vector_db_ingest import get_db_collection, embed_documents
 
+
 logger = logging.getLogger()
 
 
