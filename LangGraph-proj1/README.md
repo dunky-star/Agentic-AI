@@ -1,10 +1,8 @@
-# Agentic AI Certification – Week 5
+# Agentic AI – Week 5
 
 This repository contains code examples, reference scripts, and foundational components for **Week 5** of the Agentic AI Developer Program. This week marks the transition from traditional prompt pipelines to building **agent-based AI systems** using tools like **LangGraph**, **LangChain**, and **LangSmith**.
 
-## What You'll Learn
-
-Week 5 introduces the core building blocks of agentic systems and prepares you for more complex workflows in later modules. You’ll explore:
+The core building blocks of agentic systems for more complex workflow. Let's explore:
 
 - The **workflow-to-agent spectrum** and when to use agentic architectures.
 - The fundamentals of **LangGraph** and how to structure applications as stateful graphs.
@@ -38,15 +36,13 @@ rt-agentic-ai-cert-week5/
 
 ---
 
-## Lessons Covered So Far
-
-### **Lesson 2b – Building Your First Graph in LangGraph**
+### **2b – Building Your First Graph in LangGraph**
 
 - Introduces how to define nodes, edges, and a shared state object.
 - Example: A minimal **non-LLM agent** using the `pyjokes` library to route actions.
 - Main script: `pyjokes_joke_bot.py`
 
-### **Lesson 2c – Introducing Agentic Behavior with a Writer-Critic Loop**
+### **2c – Introducing Agentic Behavior with a Writer-Critic Loop**
 
 - Extend the previous joke bot to use LLMs for joke generation and evaluation
 - Introduce agentic workflows: generation → reflection → refinement
@@ -54,7 +50,7 @@ rt-agentic-ai-cert-week5/
 - Categories include: dad developer, chuck norris developer, knock-knock, general
 - 📄 Main script: `llm_joke_bot.py`
 
-### **Lesson 4b – Building Custom Tools**
+### **4b – Building Custom Tools**
 
 - Demonstrates how to define and register custom tools for agent use.
 - Tool functions are defined in `custom_tools.py`.
