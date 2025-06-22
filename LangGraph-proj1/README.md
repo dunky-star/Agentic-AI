@@ -1,6 +1,6 @@
 # Agentic AI – Week 5
 
-This repository contains code examples, reference scripts, and foundational components for **Week 5** of the Agentic AI Developer Program. This week marks the transition from traditional prompt pipelines to building **agent-based AI systems** using tools like **LangGraph**, **LangChain**, and **LangSmith**.
+This repository contains code examples, reference scripts, and foundational components for **Week 5** of the Agentic AI Exploration. This week marks the transition from traditional prompt pipelines to building **agent-based AI systems** using tools like **LangGraph**, **LangChain**, and **LangSmith**.
 
 The core building blocks of agentic systems for more complex workflow. Let's explore:
 

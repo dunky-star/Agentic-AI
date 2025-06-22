@@ -1,6 +1,6 @@
-# Agentic AI - From novice to Expert
+# Agentic AI - From Novice to Expert
 
-This repository contains code examples, reference scripts, and foundational components for the Agentic AI. Marking the transition from traditional prompt pipelines to building **agent-based AI systems** using tools like **LangGraph**, **LangChain**, and **LangSmith**.
+This repository contains code examples, reference scripts, and foundational components for exploring  the Agentic AI. Marking the transition from traditional prompt pipelines to building **agent-based AI systems** using tools like **LangGraph**, **LangChain**, and **LangSmith**.
 
 
 Introduces the core building blocks of agentic systems and prepares you for more complex workflows in later modules. Let's explore:
