@@ -56,7 +56,7 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 ## Contact
 
-**Yo hunters, Inc.**
+**dunky, Inc.**
 
 - Email: contact at dunkystar dot com
 - Issues & Contributions: Open an issue or PR on this repo
