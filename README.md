@@ -58,7 +58,7 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 **Yo hunters, Inc.**
 
-- Email: contact at readytensor dot com
+- Email: contact at dunkystar dot com
 - Issues & Contributions: Open an issue or PR on this repo
 - Website: [https://dunkystar.com](https://dunkystar.com)
 
