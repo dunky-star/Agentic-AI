@@ -78,6 +78,7 @@ def show_menu(state: JokeState) -> dict:
 
 def fetch_joke(state: JokeState) -> dict:
     joke_text = get_joke(language=state.language, category=state.category)
+    # print(joke_text)
     new_joke = Joke(text=joke_text, category=state.category)
     print_joke(new_joke)
     return {"jokes": [new_joke]}  # LangGraph will use the add reducer to append this
