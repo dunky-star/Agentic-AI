@@ -5,16 +5,16 @@ This graph orchestrates three different entity extraction methods and aggregates
 
 from typing import Dict, Any
 
-from tools import (
+from code.tools import (
     extract_entities_llm,
     extract_entities_spacy,
     extract_entities_gazetteer,
 )
 
-from state_and_types import EntityExtractionState, Entities
-from utils import load_config
-from paths import CONFIG_FILE_PATH
-from llm import get_llm
+from code.states_types.entity_extraction import EntityExtractionState, Entities
+from code.utils import load_config
+from code.paths import CONFIG_FILE_PATH
+from code.llm import get_llm
 
 config = load_config(CONFIG_FILE_PATH)
 
@@ -30,7 +30,7 @@ def llm_extraction_node(state: EntityExtractionState) -> Dict[str, Any]:
         entities = extract_entities_llm(
             text=state["text"],
             entity_types=state["entity_types"],
-            model_name="gpt-4o-mini",
+            model_name="llama-3.1-8b-instant",
             parallelize=True,
         )
         print(f"✅ LLM extraction completed: {len(entities)} entities found")
@@ -92,6 +92,7 @@ def aggregation_node(state: EntityExtractionState) -> Dict[str, Any]:
         Extract the most important entities from the list of entities. 
         Your response should not contain more than {MAX_ENTITIES} entities. 
         Return a list of entities. Keep the format of the entity unchanged.
+        Deduplicate the entities. Do not include the same entity more than once.
 
         Entities:
         {state["llm_entities"]}

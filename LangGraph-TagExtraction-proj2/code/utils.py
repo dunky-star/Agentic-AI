@@ -18,7 +18,7 @@ def load_publication_example(example_number: int) -> str:
     Returns:
         The content of the publication example file
     """
-    example_fpath = f"publication_example{example_number}.md"
+    example_fpath = f"publication_example{3}.md"
     full_path = os.path.join(DATA_DIR, example_fpath)
     with open(full_path, "r", encoding="utf-8") as f:
         return f.read()
