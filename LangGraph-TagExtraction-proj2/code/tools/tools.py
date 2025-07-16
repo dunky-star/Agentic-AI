@@ -6,11 +6,12 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from langchain_core.language_models import BaseChatModel
 import multiprocessing
-from llm import get_llm
-from prompt_builder import build_prompt_from_config
-from utils import load_config
-from paths import GAZETTEER_ENTITIES_FILE_PATH, PROMPT_CONFIG_FILE_PATH
-from states_types.entity_extraction import Entities
+
+from code.llm import get_llm
+from code.paths import PROMPT_CONFIG_FILE_PATH, GAZETTEER_ENTITIES_FILE_PATH
+from code.prompt_builder import build_prompt_from_config
+from code.states_types.entity_extraction import Entities
+from code.utils import load_config
 
 # Cap max_workers between 1 and (available CPUs - 2)
 available_cpus = multiprocessing.cpu_count()
