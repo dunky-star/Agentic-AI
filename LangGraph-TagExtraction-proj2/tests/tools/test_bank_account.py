@@ -60,3 +60,15 @@ class TestBankAccount:
         account = BankAccount(100)
         with pytest.raises(TypeError, match="Target must be a BankAccount instance"):
             account.transfer(50, "not_an_account")
+
+    # Standalone tests using fixtures
+
+    def test_deposit_with_fixture(self, sample_account):
+        sample_account.deposit(50)
+        assert sample_account.balance == 150
+
+    def test_transfer_with_fixture(self, two_accounts):
+        account1, account2 = two_accounts
+        account1.transfer(25, account2)
+        assert account1.balance == 75
+        assert account2.balance == 75
