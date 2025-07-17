@@ -1,7 +1,7 @@
 import yaml
 import os
 
-from paths import CONFIG_FILE_PATH, DATA_DIR
+from code.paths import CONFIG_FILE_PATH, DATA_DIR
 
 
 def load_config(config_path: str = CONFIG_FILE_PATH):
