@@ -62,4 +62,5 @@ test.py
 repo/
 
 *.png
-
+*.bin
+chroma_db/
