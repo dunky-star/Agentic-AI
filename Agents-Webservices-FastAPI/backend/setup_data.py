@@ -13,16 +13,18 @@ def safe_load_json(path):
                                "URL": d.get("URL","")})]
 
 def ingest_json():
+    print("Ingestion started.")
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     for filename in os.listdir(DOCS_DIR):
         if not filename.endswith(".json"): continue
+        print(f"Processing {filename}...")
         chunks = splitter.split_documents(safe_load_json(os.path.join(DOCS_DIR, filename)))
         collection.add(
             documents=[c.page_content for c in chunks],
             metadatas=[{**c.metadata, "chunk": i} for i, c in enumerate(chunks)],
             ids=[f"{filename}_{i}" for i in range(len(chunks))]
         )
+    print("Ingestion complete.")
 
 if __name__ == "__main__":
     ingest_json()
-    print("Ingestion complete.")

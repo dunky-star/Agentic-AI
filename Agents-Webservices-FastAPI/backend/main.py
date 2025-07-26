@@ -6,7 +6,6 @@ from rag_service import answer_research_question
 from openai import BaseModel
 
 from services import get_ai_response
-
 app = FastAPI(
     title="AI Chatbot API",
     description="A simple AI chatbot API powered by LangChain and OpenAI's GPT model.",

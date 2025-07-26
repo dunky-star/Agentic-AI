@@ -1,7 +1,9 @@
 import chromadb
 from langchain_huggingface import HuggingFaceEmbeddings
-
-DOCS_DIR = "sample_data"
+import os
+CHROMA_PATH = os.path.join(os.path.dirname(__file__), "chroma_db")
+DOCS_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
+COLLECTION_NAME = "sample_data"
 
 # Initialize embeddings
 embeddings = HuggingFaceEmbeddings(
@@ -9,5 +11,5 @@ embeddings = HuggingFaceEmbeddings(
 )
 
 # Initialize ChromaDB
-client = chromadb.PersistentClient(path="chroma_db")
-collection = client.get_or_create_collection(DOCS_DIR)
+client = chromadb.PersistentClient(path=CHROMA_PATH)
+collection = client.get_or_create_collection(COLLECTION_NAME)
