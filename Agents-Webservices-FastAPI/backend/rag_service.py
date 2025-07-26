@@ -3,6 +3,7 @@ from database import embeddings, collection
 import os
 from dotenv import load_dotenv
 import yaml
+import time
 
 load_dotenv()
 
@@ -55,6 +56,15 @@ def is_immigration_related(text: str) -> bool:
     text_lower = text.lower()
     return any(kw in text_lower for kw in IMMIGRATION_KEYWORDS)
 
+def call_with_retry(func, max_retries=3, delay=2):
+    for attempt in range(max_retries + 1):
+        try:
+            return func()
+        except Exception as e:
+            if attempt == max_retries:
+                raise e
+            time.sleep(delay * 2 ** attempt)  # Exponential backoff
+
 def answer_research_question(query: str):
     if not is_immigration_related(query):
         return ("Sorry, I am an assistant for US immigration topics only. Please ask a question related to US immigration.", [])
@@ -64,4 +74,10 @@ def answer_research_question(query: str):
 
     context = "\n\n".join([f"From {c['title']}:\n{c['content']}" for c in chunks])
     prompt = build_us_immigration_prompt(context, query)
-    return llm.invoke(prompt).content, chunks
+    def call_llm():
+        return llm.invoke(prompt, timeout=30)
+    try:
+        llm_response = call_with_retry(call_llm)
+        return llm_response.content, chunks
+    except Exception:
+        return ("Sorry, there was a problem processing your request. Please try again later.", [])
