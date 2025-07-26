@@ -1,10 +1,8 @@
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
 from database import embeddings, collection
 import os
 from dotenv import load_dotenv
 import yaml
-import re
 
 load_dotenv()
 
