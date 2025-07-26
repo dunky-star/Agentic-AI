@@ -15,7 +15,7 @@ llm = ChatOpenAI(
 
 def get_ai_response(user_message: str) -> str:
     messages = [
-        SystemMessage(content="You are a helpful assistant. Answer the user's questions clearly and concisely."),
+        SystemMessage(content="You are a helpful US immigration assistant. Answer the user's questions clearly and concisely."),
         HumanMessage(content=user_message),
     ]
     response = llm.invoke(messages)

@@ -3,14 +3,33 @@ from langchain.prompts import PromptTemplate
 from database import embeddings, collection
 import os
 from dotenv import load_dotenv
+import yaml
+import re
 
 load_dotenv()
+
+# Load prompt config
+with open(os.path.join(os.path.dirname(__file__), "config/prompt_config.yaml"), "r") as f:
+    prompt_cfg = yaml.safe_load(f)["us_immigration_assistant_cfg"]
 
 llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
     api_key=os.getenv("OPENAI_API_KEY")
 )
+
+def build_us_immigration_prompt(context: str, question: str) -> str:
+    constraints = "\n".join(f"- {c}" for c in prompt_cfg["output_constraints"])
+    style = "\n".join(f"- {s}" for s in prompt_cfg["style_or_tone"])
+    prompt = f"""
+Role: {prompt_cfg['role']}
+Instruction: {prompt_cfg['instruction']}
+Output Constraints:\n{constraints}
+Style or Tone:\n{style}
+Goal: {prompt_cfg['goal']}
+Context:\n{prompt_cfg['context']}
+\nResearch Context:\n{context}\n\nUser Question: {question}\n\nAnswer: """
+    return prompt
 
 def search_research_db(query: str, top_k: int = 3):
     query_embedding = embeddings.embed_query(query)
@@ -26,28 +45,25 @@ def search_research_db(query: str, top_k: int = 3):
         for i, doc in enumerate(results["documents"][0])
     ]
 
+IMMIGRATION_KEYWORDS = [
+    "visa", "green card", "asylum", "citizenship", "immigration", "uscis", "adjustment of status",
+    "naturalization", "deportation", "work permit", "travel ban", "refugee", "DACA", "TPS", "I-94", "I-130",
+    "I-485", "I-140", "I-765", "I-539", "I-601", "I-212", "I-864", "I-129", "I-131", "I-797", "I-9",
+    "EAD", "H-1B", "F-1", "J-1", "EB-1", "EB-2", "EB-3", "EB-5", "E-2", "E-3", "E-1", "L-1", "O-1", "TN",
+    "US immigration", "USCIS", "CBP", "ICE", "consular processing", "removal proceedings"
+]
+
+def is_immigration_related(text: str) -> bool:
+    text_lower = text.lower()
+    return any(kw in text_lower for kw in IMMIGRATION_KEYWORDS)
+
 def answer_research_question(query: str):
+    if not is_immigration_related(query):
+        return ("Sorry, I am an assistant for US immigration topics only. Please ask a question related to US immigration.", [])
     chunks = search_research_db(query)
     if not chunks:
         return ("I don't have enough information to answer this question.", [])
 
     context = "\n\n".join([f"From {c['title']}:\n{c['content']}" for c in chunks])
-    prompt = PromptTemplate(
-        input_variables=["context", "question"],
-        template="""
-Based on the following context document(s), answer the researcher's question:
-
-Research Context:
-{context}
-
-Researcher's Question: {question}
-
-Answer: Provide a answer based on the context above. Answer the user's questions clearly and concisely.
-If the context doesn't contain enough information to fully answer the question, say so clearly.
-Only answer based on the provided context, do not make assumptions or provide additional information.
-If the question is not related to the context, respond with "I don't have enough information in my
-knowledge base to answer this question. Please try adding some documents first.".
-Answer clearly and concisely, without unnecessary details.
-"""
-    ).format(context=context, question=query)
+    prompt = build_us_immigration_prompt(context, query)
     return llm.invoke(prompt).content, chunks
