@@ -47,7 +47,7 @@ run:
 	@echo "$(GREEN)[run] Starting container $(CONTAINER) on port $(PORT)$(RESET)"
 	@docker rm -f $(CONTAINER) >/dev/null 2>&1 || true
 	docker run -d --name $(CONTAINER) \
-		--memory="2g" --cpus="2" \
+		--memory="4g" --cpus="2" \
 		-p $(PORT):11434 \
 		-v $(VOLUME):/root/.ollama \
 		-e MODEL=$(MODEL) \
@@ -56,9 +56,6 @@ run:
 		-e OLLAMA_NUM_CTX=2048 \
 		-e OLLAMA_NUM_PREDICT=256 \
 		-e OLLAMA_ORIGINS="*" \
-		$$(if $(HTTP_PROXY), -e HTTP_PROXY="$(HTTP_PROXY)") \
-		$$(if $(HTTPS_PROXY), -e HTTPS_PROXY="$(HTTPS_PROXY)") \
-		$$(if $(NO_PROXY), -e NO_PROXY="$(NO_PROXY)") \
 		$(IMAGE)
 
 # Convenience: build + run

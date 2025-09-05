@@ -1,16 +1,15 @@
-# This is a sample Python script.
+from openai import OpenAI
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"  # dummy, required by SDK but ignored by Ollama
+)
 
+response = client.chat.completions.create(
+    model="gemma2:2b-instruct-q4_0",
+    messages=[
+        {"role": "user", "content": "Hello Ollama from OpenAI client!"}
+    ],
+)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+print(response.choices[0].message.content)
