@@ -1,0 +1,11 @@
+# Base image with Ollama server
+FROM ollama/ollama:latest
+
+# Pre-pull the Mistral model during build
+RUN ollama pull mistral:7b-instruct-q4_0
+
+# Expose Ollama API port
+EXPOSE 11434
+
+# Start the Ollama server when container runs
+CMD ["serve"]

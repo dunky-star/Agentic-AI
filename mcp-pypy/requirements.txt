@@ -1,0 +1,7 @@
+google-ai-generativelanguage==0.6.15
+google-generativeai==0.8.5
+ipykernel>=6.29.5
+ipywidgets>=8.1.6
+mcp[cli]==1.9.2
+requests>=2.32.0
+typer==0.16.0
