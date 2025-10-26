@@ -2,11 +2,17 @@ from llm import get_llm
 import json
 import re
 
-
-
-
-ONTOLOGY_TYPES = {'Application', 'Concept', 'Goal', 'Technique', 'Game', 'Field', 'Year', 'Company', 'Platform'}
-
+# Updated Ontology for Legal Knowledge Graphs
+ONTOLOGY_TYPES = {
+    'Case',        # e.g., Roe v. Wade
+    'Court',       # e.g., Supreme Court of the United States
+    'Law',         # e.g., Civil Rights Act, Constitution
+    'Crime',       # e.g., Fraud, Murder
+    'Party',       # e.g., Plaintiff, Defendant
+    'Evidence',    # e.g., Witness Testimony, Document
+    'Verdict',     # e.g., Guilty, Overturned
+    'Date'         # e.g., 1973
+}
 
 def print_section(title: str, body: str) -> None:
     """Render a titled block of text for console output."""
@@ -16,13 +22,11 @@ def print_section(title: str, body: str) -> None:
     print(body)
     print()
 
-
 def clean_entity_name(entity_name: str) -> str:
     """Remove leading bullets, numbering, punctuation, and whitespace from entity names."""
     cleaned = re.sub(r"^\s*\d*[\.\)]?\s*", "", entity_name)
     cleaned = re.sub(r"^\s*[\*\-•]+\s*", "", cleaned)
     return cleaned.strip()
-
 
 def parse_entities(entities_text: str) -> list[tuple[str, str]]:
     """Parse the LLM JSON response into a list of (entity, type) tuples."""
@@ -57,8 +61,6 @@ def parse_entities(entities_text: str) -> list[tuple[str, str]]:
         entities.append((clean_entity_name(str(entity_name)), normalized_type))
     return entities
 
-
-
 def sanitize_label(label: str) -> str:
     """Convert a free-form label into a Neo4j-safe label."""
     normalized = re.sub(r"\s+", "_", label.strip())
@@ -69,7 +71,6 @@ def sanitize_label(label: str) -> str:
     if not normalized[0].isalpha():
         normalized = f"Label_{normalized}"
     return normalized[0].upper() + normalized[1:] if len(normalized) > 1 else normalized.upper()
-
 
 def create_node(tx, label: str, name: str) -> None:
     """Create or reuse a node with the given label and name."""
@@ -86,7 +87,6 @@ def create_relationship(tx, entity1: str, entity2: str, relationship: str) -> No
     )
     tx.run(query, entity1=entity1, entity2=entity2)
 
-
 def persist_entities(driver, entities: list[tuple[str, str]]) -> None:
     """Create nodes and relationships in Neo4j from the parsed entities."""
     if not entities:
@@ -100,30 +100,29 @@ def persist_entities(driver, entities: list[tuple[str, str]]) -> None:
                 if i == j:
                     continue
 
-                if entity1_type == 'Application' and entity2_type == 'Concept':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'USES')
-                elif entity1_type == 'Application' and entity2_type == 'Goal':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'ACHIEVES')
-                elif entity1_type == 'Application' and entity2_type == 'Technique':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'IMPLEMENTED_WITH')
-                elif entity1_type == 'Game' and entity2_type == 'Concept':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'BASED_ON')
-                elif entity1_type == 'Field' and entity2_type == 'Concept':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'STUDIES')
-                elif entity1_type == 'Field' and entity2_type == 'Goal':
+                # Define relationships for Legal Ontology
+                if entity1_type == 'Case' and entity2_type == 'Court':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'HEARD_BY')
+                elif entity1_type == 'Case' and entity2_type == 'Law':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'INTERPRETS')
+                elif entity1_type == 'Case' and entity2_type == 'Verdict':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'RESULTED_IN')
+                elif entity1_type == 'Case' and entity2_type == 'Party':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'INVOLVES')
+                elif entity1_type == 'Crime' and entity2_type == 'Law':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'DEFINED_BY')
+                elif entity1_type == 'Party' and entity2_type == 'Crime':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'CHARGED_WITH')
+                elif entity1_type == 'Evidence' and entity2_type == 'Case':
                     session.write_transaction(create_relationship, entity1_name, entity2_name, 'SUPPORTS')
-                elif entity1_type == 'Concept' and entity2_type == 'Field':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'APPLIES_TO')
-                elif entity1_type == 'Year' and entity2_type == 'Concept':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'INTRODUCED_IN')
-                elif entity1_type == 'Goal' and entity2_type == 'Technique':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'ACHIEVED_BY')
-                elif entity1_type == 'Concept' and entity2_type == 'Technique':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'ENABLED_BY')
+                elif entity1_type == 'Court' and entity2_type == 'Verdict':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'ISSUED')
+                elif entity1_type == 'Case' and entity2_type == 'Date':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'DECIDED_ON')
 
 
 def extract_entities(text: str) -> str:
-    """Extract entities and their types from text using the configured LLM."""
+    """Extract entities and their types from text using Gemini."""
     cleaned_text = text.strip()
     if not cleaned_text:
         return '[]'
@@ -137,15 +136,14 @@ def extract_entities(text: str) -> str:
                 "type": {
                     "type": "string",
                     "enum": [
-                        "Application",
-                        "Concept",
-                        "Goal",
-                        "Technique",
-                        "Game",
-                        "Field",
-                        "Year",
-                        "Company",
-                        "Platform",
+                        "Case",
+                        "Court",
+                        "Law",
+                        "Crime",
+                        "Party",
+                        "Evidence",
+                        "Verdict",
+                        "Date",
                     ],
                 },
             },
@@ -154,9 +152,10 @@ def extract_entities(text: str) -> str:
     }
 
     prompt = f"""
-    Extract entities and their types from the text below.
-    Use only the following types: Application, Concept, Goal, Technique, Game, Field, Year, Company, Platform.
-    Output valid JSON only that matches this schema:
+    You are a legal expert creating a Legal Knowledge Graph.
+    Extract all relevant entities and their types from the text below.
+    Use only these types: Case, Court, Law, Crime, Party, Evidence, Verdict, Date.
+    Return valid JSON that matches this schema:
     {schema}
 
     Text:
