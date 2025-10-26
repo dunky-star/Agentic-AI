@@ -1,0 +1,12 @@
+google-generativeai==0.8.5
+google-ai-generativelanguage==0.6.15
+langchain-google-genai==2.0.2
+langchain-openai==0.3.28
+langchain_groq~=0.3.2
+langchain_huggingface~=0.2.0
+langchain_community~=0.3.24
+python-dotenv==1.0.1
+numpy==1.26.4
+# Wikipedia and Neo4j Python driver dependencies
+wikipedia-api==0.6.0
+neo4j==5.22.0
