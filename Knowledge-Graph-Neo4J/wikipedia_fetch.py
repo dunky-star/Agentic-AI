@@ -1,6 +1,6 @@
 import wikipediaapi
 
-def preview_wikipedia_page(page_title: str = "Criminal_law", preview_chars: int = 2000) -> str:
+def preview_wikipedia_page(page_title: str = "Customer_experience", preview_chars: int = 2000) -> str:
     """Return a preview snippet of a Wikipedia page or raise when the page is missing."""
     wiki = wikipediaapi.Wikipedia(
         language='en',

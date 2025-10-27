@@ -10,29 +10,19 @@ def main() -> None:
     """Entry point for running the Wikipedia legal knowledge extraction and Neo4j persistence."""
     load_dotenv()
 
-    # List of landmark Supreme Court cases and core legal topics
-    cases = [
-        "Roe_v._Wade",
-        "Brown_v._Board_of_Education",
-        "Miranda_v._Arizona",
-        "Marbury_v._Madison",
-        "Gideon_v._Wainwright",
-        "Plessy_v._Ferguson",
-        "Criminal_law",
-        "Evidence_law",
-        "Corporate_crime",
-        "International_criminal_law",
-        "Cybercrime",
-        "White-collar_crime",
-        "Criminal_procedure",
-        "Sentencing",
-        "Juvenile_delinquency",
-        "Constitutional_law",
-        "Tort_law",
-        "Contract_law",
-        "Administrative_law",
-        "Property_law",
-        "Common_law"
+    # List of ECommerce Giants related pages to process
+    pages = [
+        "PayPal_Inc.",
+        "PayPal",
+        "Apple_Inc.",
+        "Customer_experience",
+        "E-commerce",
+        "Online_shopping",
+        "Consumer_behavior",
+        "Product_management",
+        "Amazon_(company)",
+        "Brand_loyalty",
+        "Digital_Payments"
     ]
 
     # Connect to Neo4j
@@ -51,13 +41,13 @@ def main() -> None:
     except Exception as exc:
         print_section('Neo4j Status', f'Health check failed: {exc}')
 
-    # Loop through each case/topic and process it
-    for case in cases:
+    # Loop through each topic and process it
+    for page in pages:
         try:
-            preview = preview_wikipedia_page(case)
-            print_section(f'Wikipedia Preview: {case}', preview[:800])  # show first 800 chars only
+            preview = preview_wikipedia_page(page)
+            print_section(f'Wikipedia Preview: {page}', preview[:800])  # show first 800 chars only
         except ValueError as exc:
-            print_section(f'Wikipedia Preview: {case}', str(exc))
+            print_section(f'Wikipedia Preview: {page}', str(exc))
             continue
 
         try:
@@ -66,13 +56,13 @@ def main() -> None:
             parsed_entities = parse_entities(entities_text)
 
             if parsed_entities:
-                print_section(f'Wikipedia Entities: {case}', repr(parsed_entities))
+                print_section(f'Wikipedia Entities: {page}', repr(parsed_entities))
                 persist_entities(driver, parsed_entities)
             else:
                 fallback = entities_text.strip() or '[]'
-                print_section(f'Wikipedia Entities: {case}', fallback)
+                print_section(f'Wikipedia Entities: {page}', fallback)
         except Exception as exc:
-            print_section(f'Wikipedia Entities: {case}', f'Failed to extract entities: {exc}')
+            print_section(f'Wikipedia Entities: {page}', f'Failed to extract entities: {exc}')
 
     # Close Neo4j connection
     driver.close()

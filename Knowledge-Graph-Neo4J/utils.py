@@ -2,16 +2,18 @@ from llm import get_llm
 import json
 import re
 
-# Updated Ontology for Legal Knowledge Graphs
+# Updated Ontology for Customers-Products Knowledge Graphs
 ONTOLOGY_TYPES = {
-    'Case',        # e.g., Roe v. Wade
-    'Court',       # e.g., Supreme Court of the United States
-    'Law',         # e.g., Civil Rights Act, Constitution
-    'Crime',       # e.g., Fraud, Murder
-    'Party',       # e.g., Plaintiff, Defendant
-    'Evidence',    # e.g., Witness Testimony, Document
-    'Verdict',     # e.g., Guilty, Overturned
-    'Date'         # e.g., 1973
+    'Customer',     # e.g., Geoffrey Duncan Opiyo, Alice
+    'Product',      # e.g., iPhone 15, AirPods
+    'Brand',        # e.g., Apple, Samsung, PayPal
+    'Category',     # e.g., Electronics, Clothing
+    'Interaction',  # e.g., Purchase, Review, Like
+    'Preference',   # e.g., High Quality, Affordable
+    'Feature',      # e.g., Battery Life, Screen Size
+    'Date'          # e.g., 2025-10-26
+    "Transaction",  # e.g., Order12345
+    'PaymentMethod' # e.g., Credit Card, PayPal
 }
 
 def print_section(title: str, body: str) -> None:
@@ -88,45 +90,59 @@ def create_relationship(tx, entity1: str, entity2: str, relationship: str) -> No
     tx.run(query, entity1=entity1, entity2=entity2)
 
 def persist_entities(driver, entities: list[tuple[str, str]]) -> None:
-    """Create nodes and relationships in Neo4j from the parsed entities."""
+    """Create nodes and relationships in Neo4j from parsed entities (Customer-Product-Payment Knowledge Graph)."""
     if not entities:
         return
 
     with driver.session() as session:
         for i, (entity1_name, entity1_type) in enumerate(entities):
+            # Ensure node exists or merge
             session.write_transaction(create_node, sanitize_label(entity1_type), entity1_name)
 
             for j, (entity2_name, entity2_type) in enumerate(entities):
                 if i == j:
                     continue
 
-                # Define relationships for Legal Ontology
-                if entity1_type == 'Case' and entity2_type == 'Court':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'HEARD_BY')
-                elif entity1_type == 'Case' and entity2_type == 'Law':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'INTERPRETS')
-                elif entity1_type == 'Case' and entity2_type == 'Verdict':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'RESULTED_IN')
-                elif entity1_type == 'Case' and entity2_type == 'Party':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'INVOLVES')
-                elif entity1_type == 'Crime' and entity2_type == 'Law':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'DEFINED_BY')
-                elif entity1_type == 'Party' and entity2_type == 'Crime':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'CHARGED_WITH')
-                elif entity1_type == 'Evidence' and entity2_type == 'Case':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'SUPPORTS')
-                elif entity1_type == 'Court' and entity2_type == 'Verdict':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'ISSUED')
-                elif entity1_type == 'Case' and entity2_type == 'Date':
-                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'DECIDED_ON')
+                # CUSTOMER–PRODUCT relationships
+                if entity1_type == 'Customer' and entity2_type == 'Product':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'PURCHASED')
+                elif entity1_type == 'Customer' and entity2_type == 'Preference':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'HAS_PREFERENCE')
+                elif entity1_type == 'Customer' and entity2_type == 'Brand':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'TRUSTS')
+                elif entity1_type == 'Customer' and entity2_type == 'Product':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'VIEWED')
+
+                # PRODUCT–BRAND–CATEGORY relationships
+                elif entity1_type == 'Product' and entity2_type == 'Brand':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'OFFERED_BY')
+                elif entity1_type == 'Product' and entity2_type == 'Category':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'BELONGS_TO')
+                elif entity1_type == 'Product' and entity2_type == 'Feature':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'HAS_FEATURE')
+                elif entity1_type == 'Product' and entity2_type == 'Product':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'SIMILAR_TO')
+
+                # PAYMENT + TRANSACTION relationships
+                elif entity1_type == 'Customer' and entity2_type == 'PaymentMethod':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'USES')
+                elif entity1_type == 'PaymentMethod' and entity2_type == 'Transaction':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'PROCESSES')
+                elif entity1_type == 'Customer' and entity2_type == 'Transaction':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'INITIATED')
+
+                # GENERAL FALLBACK (optional)
+                elif entity1_type == 'Category' and entity2_type == 'Brand':
+                    session.write_transaction(create_relationship, entity1_name, entity2_name, 'REPRESENTED_BY')
 
 
 def extract_entities(text: str) -> str:
-    """Extract entities and their types from text using Gemini."""
+    """Extract entities and their types from text using Gemini (Customer-Product-Preference domain)."""
     cleaned_text = text.strip()
     if not cleaned_text:
         return '[]'
 
+    # Define the JSON schema expected from Gemini
     schema = {
         "type": "array",
         "items": {
@@ -136,14 +152,16 @@ def extract_entities(text: str) -> str:
                 "type": {
                     "type": "string",
                     "enum": [
-                        "Case",
-                        "Court",
-                        "Law",
-                        "Crime",
-                        "Party",
-                        "Evidence",
-                        "Verdict",
+                        "Customer",
+                        "Product",
+                        "Brand",
+                        "Category",
+                        "Interaction",
+                        "Preference",
+                        "Feature",
                         "Date",
+                        "Transaction",
+                        "PaymentMethod"
                     ],
                 },
             },
@@ -151,21 +169,36 @@ def extract_entities(text: str) -> str:
         },
     }
 
+    # LLM instruction prompt for Gemini
     prompt = f"""
-    You are a legal expert creating a Legal Knowledge Graph.
-    Extract all relevant entities and their types from the text below.
-    Use only these types: Case, Court, Law, Crime, Party, Evidence, Verdict, Date.
-    Return valid JSON that matches this schema:
+    You are a market intelligence expert building a Knowledge Graph of customer-product relationships.
+
+    Extract all relevant entities and their types from the text below using ONLY these types:
+    Customer, Product, Brand, Category, Interaction, Preference, Feature, Date, PaymentMethod.
+
+    Guidelines:
+    - Customers are people or user identifiers.
+    - Products are physical or digital items.
+    - Brands are companies offering products.
+    - Categories group products.
+    - Interactions describe user actions (purchase, view, like, review, payment, ).
+    - Preferences describe opinions (e.g., affordable, durable, convenient, secure).
+    - Features describe product characteristics (e.g., battery life, security, integration).
+    - Dates represent temporal information such as release or transaction times.
+
+    Return **valid JSON** that matches this schema:
     {schema}
 
     Text:
     {cleaned_text}
     """
 
+    # Initialize Gemini model
     llm = get_llm('gemini-2.5-flash', temperature=0.0)
     response = llm.invoke(prompt)
     content = getattr(response, 'content', response)
 
+    # Handle both list and text responses robustly
     if isinstance(content, list):
         content = ''.join(
             str(part.get('text', part)) if isinstance(part, dict) else str(part)
